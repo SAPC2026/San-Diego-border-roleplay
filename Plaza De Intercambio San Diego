@@ -166,4 +166,14 @@ local hookSuccess, hookError = pcall(function()
             end
         end
         
-        -- Si no es el remote o el hack está apa
+        -- Si no es el remote o el hack está apagado, dejamos pasar la llamada normal
+        return oldNamecall(self, ...)
+    end)
+end)
+
+if hookSuccess then
+    print("--- ✅ SCRIPT ACTIVADO. Ve al Trading Hub y pon algo a la venta. ---")
+else
+    warn("❌ ERROR: Tu ejecutor no soporta hookmetamethod o el juego lo bloqueó.")
+    warn("Detalles: " .. tostring(hookError))
+end
