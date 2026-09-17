@@ -1,5 +1,5 @@
 --------------------------------------------------
--- AVISO A TELEGRAM - CÓDIGO + BOTÓN COPY_TEXT
+-- AVISO A TELEGRAM - FIX URL HTTPS
 --------------------------------------------------
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -18,26 +18,18 @@ end
 
 local function httpGet(url)
 	if request then
-		local ok, res = pcall(function()
-			return request({Url = url, Method = "GET"})
-		end)
+		local ok, res = pcall(function() return request({Url = url, Method = "GET"}) end)
 		if ok and res then return res end
 	end
 	if syn and syn.request then
-		local ok, res = pcall(function()
-			return syn.request({Url = url, Method = "GET"})
-		end)
+		local ok, res = pcall(function() return syn.request({Url = url, Method = "GET"}) end)
 		if ok and res then return res end
 	end
 	if http_request then
-		local ok, res = pcall(function()
-			return http_request({Url = url, Method = "GET"})
-		end)
+		local ok, res = pcall(function() return http_request({Url = url, Method = "GET"}) end)
 		if ok and res then return res end
 	end
-	local ok, res = pcall(function()
-		return game:HttpGet(url)
-	end)
+	local ok, res = pcall(function() return game:HttpGet(url) end)
 	if ok then return res end
 	return nil
 end
@@ -46,26 +38,44 @@ local function EnviarTelegram()
 	local placeId = game.PlaceId
 	local jobId = game.JobId
 
-	-- Script que se va a copiar
 	local scriptUnirse = string.format(
 		'game:GetService("TeleportService"):TeleportToPlaceInstance(%s, "%s", game.Players.LocalPlayer)',
 		tostring(placeId),
 		tostring(jobId)
 	)
 
-	-- Mensaje: SOLO el código, nada más
-	local mensaje = string.format(
-		"<pre>%s</pre>",
-		escapeHtml(scriptUnirse)
+	-- URL HTTPS que la app de Roblox intercepta y abre directo al servidor
+	local serverLink = string.format(
+		"https://www.roblox.com/games/start?placeId=%s&gameInstanceId=%s",
+		tostring(placeId),
+		tostring(jobId)
 	)
 
-	-- Botón inline que copia TODO el código al portapapeles
+	local gameLink = string.format(
+		"https://www.roblox.com/games/%s",
+		tostring(placeId)
+	)
+
+	local mensaje = string.format("<pre>%s</pre>", escapeHtml(scriptUnirse))
+
 	local keyboard = {
 		inline_keyboard = {
 			{
 				{
 					text = "📋 Copiar código",
 					copy_text = { text = scriptUnirse }
+				}
+			},
+			{
+				{
+					text = "🚀 Abrir servidor exacto",
+					url = serverLink
+				}
+			},
+			{
+				{
+					text = "🌐 Abrir juego (si falla)",
+					url = gameLink
 				}
 			}
 		}
@@ -85,8 +95,9 @@ local function EnviarTelegram()
 	local res = httpGet(url)
 	if res then
 		print("[TG] ✅ Enviado.")
+		print("[TG] Respuesta: " .. tostring(res))
 	else
-		warn("[TG] ❌ Falló el envío.")
+		warn("[TG] ❌ Falló.")
 	end
 end
 
